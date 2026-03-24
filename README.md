@@ -160,7 +160,7 @@ Answer: If you want to terminate this agreement, you must:
 3. Note that confidentiality obligations survive termination (Clause 4)
 
 Risk Score: 2/10 — Very Low Risk 
-Sources: Clause 3, Clause 4 from NDA_Basic
+
 ```
 
 ---
