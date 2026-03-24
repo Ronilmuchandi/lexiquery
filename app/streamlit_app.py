@@ -14,7 +14,12 @@
 #   - See risk score (1-10) with visual indicator
 #   - Compare multiple contracts
 # =============================================================
+import sys
+import os
 
+# Add project root to Python path
+# Fixes 'No module named src' error on Streamlit Cloud
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import streamlit as st
 import os
 import tempfile
