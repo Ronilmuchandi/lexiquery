@@ -1,4 +1,4 @@
-# ⚖️ LexiQuery — Intelligent Legal Contract Analyzer
+#  LexiQuery — Intelligent Legal Contract Analyzer
 
 > AI-powered legal contract analysis system built with RAG architecture, ChromaDB, Groq (Llama 3.3 70B), and Streamlit.
 
@@ -10,7 +10,7 @@
 
 ---
 
-## 🎯 What is LexiQuery?
+## What is LexiQuery?
 
 LexiQuery is a **full stack Generative AI application** that uses 
 **Retrieval Augmented Generation (RAG)** to help non-lawyers 
@@ -21,18 +21,18 @@ Get AI-powered answers with clause citations and risk scores.
 
 ---
 
-## ✨ Features
+##  Features
 
-- 📄 **Smart PDF Parsing** — Extracts and chunks contracts by legal clauses
-- 💬 **Natural Language Q&A** — Ask any question about your contract
-- 🎯 **Risk Scoring** — Automatic 1-10 risk score with red flags
-- 🔍 **Multi-Contract Comparison** — Compare contracts side by side
-- 📎 **Source Citations** — Every answer cites the exact clause
-- 🚀 **Fast** — Powered by Groq's ultra-fast Llama 3.3 70B
+-  **Smart PDF Parsing** — Extracts and chunks contracts by legal clauses
+-  **Natural Language Q&A** — Ask any question about your contract
+-  **Risk Scoring** — Automatic 1-10 risk score with red flags
+-  **Multi-Contract Comparison** — Compare contracts side by side
+-  **Source Citations** — Every answer cites the exact clause
+-  **Fast** — Powered by Groq's ultra-fast Llama 3.3 70B
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 ```
 User uploads PDF
       ↓
@@ -55,7 +55,7 @@ Plain English Answer with clause citations
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Component | Technology |
 |---|---|
@@ -71,7 +71,7 @@ Plain English Answer with clause citations
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Python 3.9+
@@ -113,7 +113,7 @@ docker run -p 8501:8501 --env-file .env lexiquery
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 ```
 lexiquery/
 ├── app/
@@ -141,7 +141,7 @@ lexiquery/
 
 ---
 
-## 💡 Example Queries
+##  Example Queries
 
 - *"What are my obligations if I want to terminate this agreement?"*
 - *"Are there any non-compete clauses? What do they cover?"*
@@ -150,7 +150,7 @@ lexiquery/
 
 ---
 
-## 📊 Sample Output
+##  Sample Output
 ```
 Question: What are my obligations if I terminate this agreement?
 
@@ -159,13 +159,13 @@ Answer: If you want to terminate this agreement, you must:
 2. Return any records or materials to the Disclosing Party (Clause 3)
 3. Note that confidentiality obligations survive termination (Clause 4)
 
-Risk Score: 2/10 — Very Low Risk ✅
+Risk Score: 2/10 — Very Low Risk 
 Sources: Clause 3, Clause 4 from NDA_Basic
 ```
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 - [ ] OCR support for scanned PDFs
 - [ ] Multi-language contract support  
@@ -175,17 +175,17 @@ Sources: Clause 3, Clause 4 from NDA_Basic
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Ronil Muchandi**  
 MS Data Science & Analytics — University of Missouri  
-📧 ronilmizzou@gmail.com  
-🔗 [LinkedIn](https://linkedin.com/in/ronil-muchandi-892602187)  
-🐙 [GitHub](https://github.com/Ronilmuchandi)
+ ronilmizzou@gmail.com  
+ [LinkedIn](https://linkedin.com/in/ronil-muchandi-892602187)  
+ [GitHub](https://github.com/Ronilmuchandi)
 
 ---
 
-## ⚠️ Disclaimer
+##  Disclaimer
 
 LexiQuery is for informational purposes only and does not 
 constitute legal advice. Always consult a qualified lawyer 
