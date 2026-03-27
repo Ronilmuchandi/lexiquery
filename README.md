@@ -26,7 +26,7 @@ Get AI-powered answers with clause citations and risk scores.
 ![Home](demo/home.png)
 
 ### 📄 Analyze Contract
-![Analyze](demo/analyze.png)
+![Analyze](demo/Screenshot%202026-03-26%20at%208.19.10%20PM.png)
 
 ### ⚖️ Risk Score
 ![Risk Score](demo/risk.png)
