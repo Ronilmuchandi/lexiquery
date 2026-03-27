@@ -1,4 +1,4 @@
-#  LexiQuery — Intelligent Legal Contract Analyzer
+# ⚖️ LexiQuery — Intelligent Legal Contract Analyzer
 
 > AI-powered legal contract analysis system built with RAG architecture, ChromaDB, Groq (Llama 3.3 70B), and Streamlit.
 
@@ -10,22 +10,19 @@
 
 ---
 
-## What is LexiQuery?
+## 🤖 What is LexiQuery?
 
-LexiQuery is a **full stack Generative AI application** that uses 
-**Retrieval Augmented Generation (RAG)** to help non-lawyers 
-understand legal contracts instantly.
+LexiQuery is a **full stack Generative AI application** that uses **Retrieval Augmented Generation (RAG)** to help non-lawyers understand legal contracts instantly.
 
-Upload any legal contract → Ask questions in plain English → 
-Get AI-powered answers with clause citations and risk scores.
+Upload any legal contract → Ask questions in plain English → Get AI-powered answers with clause citations and risk scores.
 
 ---
 
 ## 🎬 Demo Video
 
-https://github.com/Ronilmuchandi/lexiquery/blob/main/demo/demo.mov
+Download and watch: [demo/demo.mov](demo/demo.mov)
 
-> Click "View Raw" to download and watch the demo
+---
 
 ## 📸 Screenshots
 
@@ -37,22 +34,25 @@ https://github.com/Ronilmuchandi/lexiquery/blob/main/demo/demo.mov
 
 ### ⚖️ Risk Score
 ![Risk Score](demo/risk.png)
-##  Features
-
--  **Smart PDF Parsing** — Extracts and chunks contracts by legal clauses
--  **Natural Language Q&A** — Ask any question about your contract
--  **Risk Scoring** — Automatic 1-10 risk score with red flags
--  **Multi-Contract Comparison** — Compare contracts side by side
--  **Source Citations** — Every answer cites the exact clause
--  **Fast** — Powered by Groq's ultra-fast Llama 3.3 70B
 
 ---
 
-## Architecture
+## ✨ Features
+
+- 📄 **Smart PDF Parsing** — Extracts and chunks contracts by legal clauses
+- 💬 **Natural Language Q&A** — Ask any question about your contract
+- 🎯 **Risk Scoring** — Automatic 1-10 risk score with red flags
+- 🔍 **Multi-Contract Comparison** — Compare contracts side by side
+- 📎 **Source Citations** — Every answer cites the exact clause
+- 🚀 **Fast** — Powered by Groq's ultra-fast Llama 3.3 70B
+
+---
+
+## 🏗️ Architecture
 ```
 User uploads PDF
       ↓
-PDF Parser (pdfplumber)
+PDF Parser (pypdfium2)
       ↓
 Clause Chunker (regex-based legal structure detection)
       ↓
@@ -71,7 +71,7 @@ Plain English Answer with clause citations
 
 ---
 
-##  Tech Stack
+## 🛠️ Tech Stack
 
 | Component | Technology |
 |---|---|
@@ -79,7 +79,7 @@ Plain English Answer with clause citations
 | LLM | Llama 3.3 70B via Groq API |
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
 | Vector Database | ChromaDB |
-| PDF Parsing | pdfplumber |
+| PDF Parsing | pypdfium2 |
 | Frontend | Streamlit |
 | Backend | FastAPI |
 | Containerization | Docker |
@@ -87,13 +87,13 @@ Plain English Answer with clause citations
 
 ---
 
-##  Getting Started
+## 🚀 How to Run
 
 ### Prerequisites
 - Python 3.9+
-- Groq API key (free at console.groq.com)
+- Groq API key (free at [console.groq.com](https://console.groq.com))
 
-### Installation
+### Option 1 — Run Locally
 ```bash
 # Clone the repository
 git clone https://github.com/Ronilmuchandi/lexiquery.git
@@ -108,28 +108,36 @@ pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
-# Add your GROQ_API_KEY to .env file
+# Open .env and add your GROQ_API_KEY
 ```
 
-### Run the App
+Run the app:
 ```bash
-PYTHONPATH=/path/to/lexiquery streamlit run app/streamlit_app.py
+PYTHONPATH=$(pwd) streamlit run app/streamlit_app.py
 ```
 
 Open **http://localhost:8501** in your browser.
 
-### Docker
+### Option 2 — Run with Docker
 ```bash
-# Build
-docker build -t lexiquery .
+# Clone the repository
+git clone https://github.com/Ronilmuchandi/lexiquery.git
+cd lexiquery
 
-# Run
+# Set up environment variables
+cp .env.example .env
+# Open .env and add your GROQ_API_KEY
+
+# Build and run
+docker build -t lexiquery .
 docker run -p 8501:8501 --env-file .env lexiquery
 ```
 
+Open **http://localhost:8501** in your browser.
+
 ---
 
-##  Project Structure
+## 📁 Project Structure
 ```
 lexiquery/
 ├── app/
@@ -137,19 +145,37 @@ lexiquery/
 │   └── streamlit_app.py     # Streamlit frontend
 ├── src/
 │   ├── llm/
-│   │   └── groq_client.py   # Groq LLM connection
+│   │   ├── groq_client.py   # Groq LLM connection
+│   │   └── utils.py         # LLM helper utilities
 │   ├── rag/
 │   │   ├── parser.py        # PDF text extraction
 │   │   ├── chunker.py       # Clause-level chunking
 │   │   ├── embedder.py      # Sentence embeddings
 │   │   └── retriever.py     # ChromaDB operations
-│   └── pipeline/
-│       ├── indexer.py       # Contract indexing pipeline
-│       ├── analyzer.py      # RAG Q&A pipeline
-│       └── comparator.py    # Risk scoring + comparison
+│   ├── pipeline/
+│   │   ├── indexer.py       # Contract indexing pipeline
+│   │   ├── analyzer.py      # RAG Q&A pipeline
+│   │   └── comparator.py    # Risk scoring + comparison
+│   ├── utils/
+│   │   ├── rate_limiter.py  # API rate limiting
+│   │   └── export.py        # Export analysis reports
+│   └── handlers/
+│       └── error_handler.py # Centralized error handling
+├── config/
+│   ├── model_config.yaml    # Model settings
+│   ├── prompt_templates.yaml# LLM prompt templates
+│   └── logging_config.yaml  # Logging configuration
 ├── data/
-│   └── contracts/           # Sample contracts
-├── config/                  # Configuration files
+│   ├── contracts/           # Uploaded PDF contracts
+│   ├── vectorstore/         # ChromaDB storage
+│   └── outputs/             # Exported reports
+├── demo/                    # Screenshots and demo video
+├── examples/
+│   └── sample_contract.pdf  # Sample NDA for testing
+├── notebooks/
+│   └── testing.ipynb        # Testing notebook
+├── .env.example             # Environment variables template
+├── .gitignore               # Git ignore rules
 ├── Dockerfile               # Container setup
 ├── requirements.txt         # Dependencies
 └── README.md                # You are here!
@@ -157,16 +183,17 @@ lexiquery/
 
 ---
 
-##  Example Queries
+## 💡 Example Queries
 
 - *"What are my obligations if I want to terminate this agreement?"*
 - *"Are there any non-compete clauses? What do they cover?"*
 - *"Flag any clauses that are unusual or particularly risky"*
 - *"What information is considered confidential?"*
+- *"How does Section 3 compare to Section 4?"*
 
 ---
 
-##  Sample Output
+## 📊 Sample Output
 ```
 Question: What are my obligations if I terminate this agreement?
 
@@ -175,34 +202,32 @@ Answer: If you want to terminate this agreement, you must:
 2. Return any records or materials to the Disclosing Party (Clause 3)
 3. Note that confidentiality obligations survive termination (Clause 4)
 
-Risk Score: 2/10 — Very Low Risk 
-
+Risk Score: 2/10 — Very Low Risk ✅
+Sources: Clause 3, Clause 4 from NDA_Basic
 ```
 
 ---
 
-##  Future Improvements
+## 🔮 Future Improvements
 
 - [ ] OCR support for scanned PDFs
-- [ ] Multi-language contract support  
+- [ ] Multi-language contract support
 - [ ] Export analysis as PDF report
 - [ ] Clause-by-clause walkthrough mode
 - [ ] Integration with cloud storage (AWS S3)
 
 ---
 
-##  Author
+## 👨‍💻 Author
 
-**Ronil Muchandi**  
-MS Data Science & Analytics — University of Missouri  
- ronilmizzou@gmail.com  
- [LinkedIn](https://linkedin.com/in/ronil-muchandi-892602187)  
- [GitHub](https://github.com/Ronilmuchandi)
+**Ronil Muchandi**
+MS Data Science & Analytics — University of Missouri
+📧 ronilmizzou@gmail.com
+🔗 [LinkedIn](https://linkedin.com/in/ronil-muchandi-892602187)
+🐙 [GitHub](https://github.com/Ronilmuchandi)
 
 ---
 
-##  Disclaimer
+## ⚠️ Disclaimer
 
-LexiQuery is for informational purposes only and does not 
-constitute legal advice. Always consult a qualified lawyer 
-for important legal decisions.
+LexiQuery is for informational purposes only and does not constitute legal advice. Always consult a qualified lawyer for important legal decisions.
