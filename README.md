@@ -26,11 +26,10 @@ Get AI-powered answers with clause citations and risk scores.
 ![Home](demo/home.png)
 
 ### 📄 Analyze Contract
-![Analyze](demo/Screenshot%202026-03-26%20at%208.19.10%20PM.png)
+![Analyze](demo/analyze.png)
 
 ### ⚖️ Risk Score
 ![Risk Score](demo/risk.png)
-
 ##  Features
 
 -  **Smart PDF Parsing** — Extracts and chunks contracts by legal clauses
