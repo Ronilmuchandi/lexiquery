@@ -20,6 +20,13 @@ Upload any legal contract → Ask questions in plain English →
 Get AI-powered answers with clause citations and risk scores.
 
 ---
+
+## 🎬 Demo Video
+
+https://github.com/Ronilmuchandi/lexiquery/blob/main/demo/demo.mov
+
+> Click "View Raw" to download and watch the demo
+
 ## 📸 Screenshots
 
 ### 🏠 Home
