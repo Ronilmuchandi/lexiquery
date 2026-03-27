@@ -20,6 +20,16 @@ Upload any legal contract → Ask questions in plain English →
 Get AI-powered answers with clause citations and risk scores.
 
 ---
+## 📸 Screenshots
+
+### 🏠 Home
+![Home](demo/home.png)
+
+### 📄 Analyze Contract
+![Analyze](demo/analyze.png)
+
+### ⚖️ Risk Score
+![Risk Score](demo/risk.png)
 
 ##  Features
 

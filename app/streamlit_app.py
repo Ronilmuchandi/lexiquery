@@ -52,7 +52,7 @@ st.set_page_config(
 # =============================================================
 st.markdown("""
 <style>
-    /* Background image - law themed */
+    /* Background image */
     .stApp {
         background-image: url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920');
         background-size: cover;
@@ -60,41 +60,164 @@ st.markdown("""
         background-attachment: fixed;
     }
     
-    /* Dark overlay for readability */
+    /* Dark overlay */
     .stApp::before {
         content: '';
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(10, 15, 30, 0.85);
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(10, 15, 30, 0.88);
         z-index: 0;
     }
-    
-    /* Main header */
-.main-header {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #c9a84c;
-    text-align: center;
-    padding: 1rem 0;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+
+    /* ALL text white by default */
+    * {
+        color: white !important;
+    }
+
+    /* Headers gold */
+    h1, h2, h3 {
+        color: #c9a84c !important;
+    }
+
+    /* Input boxes - dark grey background white text */
+.stTextInput input, 
+.stTextArea textarea,
+.stSelectbox select,
+div[data-baseweb="select"],
+div[data-baseweb="input"],
+[data-testid="stFileUploadDropzone"],
+div[data-baseweb="textarea"] {
+    background: rgba(50,50,60,0.9) !important;
+    color: white !important;
+    border: 1px solid #c9a84c !important;
 }
-    
+
+/* Placeholder text */
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder {
+    color: rgba(255,255,255,0.5) !important;
+}
+
+/* File uploader box */
+.stFileUploader,
+.stFileUploader > div,
+.stFileUploader label,
+[data-testid="stFileUploadDropzone"],
+[data-testid="stFileUploadDropzone"] > div,
+section[data-testid="stFileUploadDropzone"] {
+    background: rgba(50,50,60,0.9) !important;
+    border: 1px dashed #c9a84c !important;
+    color: white !important;
+}
+
+/* Every element inside file uploader */
+[data-testid="stFileUploadDropzone"] * {
+    color: white !important;
+    background: transparent !important;
+}
+
+/* The outer white wrapper */
+.uploadedFile,
+div.css-1cpxqw2,
+div.css-u8hs99 {
+    background: rgba(50,50,60,0.9) !important;
+    color: white !important;
+}
+
+/* File uploader inner text */
+[data-testid="stFileUploadDropzone"] p,
+[data-testid="stFileUploadDropzone"] span {
+    color: white !important;
+}
+
+/* Selectbox dropdown */
+div[data-baseweb="select"] > div {
+    background: rgba(50,50,60,0.9) !important;
+    color: white !important;
+}
+
+/* Dropdown options list */
+ul[data-testid="stSelectboxVirtualDropdown"] {
+    background: rgba(30,30,40,0.98) !important;
+}
+
+ul[data-testid="stSelectboxVirtualDropdown"] li {
+    color: white !important;
+}
+
+ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
+    background: rgba(201,168,76,0.3) !important;
+}
+
+    /* Dropdown options */
+    div[data-baseweb="popover"] {
+        background: #1a1a2e !important;
+        color: white !important;
+    }
+
+    /* Buttons */
+    .stButton button {
+        background: rgba(201,168,76,0.2) !important;
+        color: white !important;
+        border: 1px solid #c9a84c !important;
+    }
+
+    .stButton button:hover {
+        background: rgba(201,168,76,0.4) !important;
+    }
+
+    /* File uploader */
+    .stFileUploader {
+        background: rgba(255,255,255,0.1) !important;
+        border: 1px dashed #c9a84c !important;
+        color: white !important;
+    }
+
+    /* Success/info/warning boxes */
+    .stSuccess, .stInfo, .stWarning, .stError {
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
+    }
+
+    /* Sidebar */
+    .css-1d391kg, [data-testid="stSidebar"] {
+        background: rgba(10,15,30,0.95) !important;
+    }
+
+    /* Radio buttons */
+    .stRadio label {
+        color: white !important;
+    }
+
+    /* Caption text */
+    .stCaption {
+        color: #c9a84c !important;
+    }
+
+    /* Main header */
+    .main-header {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #c9a84c !important;
+        text-align: center;
+        padding: 1rem 0;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    }
+
     /* Subtitle */
     .sub-header {
         font-size: 1.1rem;
-        color: #e0c97f;
+        color: white !important;
         text-align: center;
         margin-bottom: 2rem;
     }
-    
+
     /* Risk score colors */
-    .risk-low { color: #28a745; font-size: 2rem; font-weight: 700; }
-    .risk-medium { color: #ffc107; font-size: 2rem; font-weight: 700; }
-    .risk-high { color: #dc3545; font-size: 2rem; font-weight: 700; }
-    
+    .risk-low { color: #28a745 !important; font-size: 2rem; font-weight: 700; }
+    .risk-medium { color: #ffc107 !important; font-size: 2rem; font-weight: 700; }
+    .risk-high { color: #dc3545 !important; font-size: 2rem; font-weight: 700; }
+
     /* Clause card */
     .clause-card {
         background: rgba(255,255,255,0.08);
@@ -102,27 +225,43 @@ st.markdown("""
         padding: 1rem;
         margin: 0.5rem 0;
         border-radius: 4px;
-        color: #fff;
+        color: white !important;
     }
-    
+
     /* Answer box */
     .answer-box {
-        background: rgba(201, 168, 76, 0.15);
+        background: rgba(201,168,76,0.15);
         border: 1px solid #c9a84c;
         border-radius: 8px;
         padding: 1.5rem;
         margin: 1rem 0;
-        color: #fff;
+        color: black !important;
     }
 
     /* Footer */
     .footer {
         text-align: center;
-        color: #c9a84c;
+        color: #c9a84c !important;
         font-size: 0.8rem;
         margin-top: 3rem;
         padding-top: 1rem;
         border-top: 1px solid #c9a84c44;
+    }
+
+    /* Expander */
+    .streamlit-expanderHeader {
+        color: white !important;
+        background: rgba(255,255,255,0.1) !important;
+    }
+
+    /* Metric */
+    [data-testid="stMetricValue"] {
+        color: #c9a84c !important;
+    }
+
+    /* Progress bar */
+    .stProgress > div > div {
+        background: #c9a84c !important;
     }
 </style>
 """, unsafe_allow_html=True)
