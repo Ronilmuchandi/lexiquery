@@ -1,0 +1,19 @@
+# =============================================================
+# FILE: config/logging_config.yaml
+# PURPOSE: Logging configuration for LexiQuery
+# =============================================================
+
+version: 1
+formatters:
+  standard:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: standard
+    level: INFO
+
+root:
+  level: INFO
+  handlers: [console]
