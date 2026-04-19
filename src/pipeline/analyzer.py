@@ -18,7 +18,7 @@
 from src.llm.groq_client import get_llm_response
 
 # Our ChromaDB retrieval function
-from src.rag.retriever import retrieve_relevant_clauses
+from src.rag.hybrid_retriever import hybrid_retrieve as retrieve_relevant_clauses
 
 # Type hints
 from typing import Dict, Optional
