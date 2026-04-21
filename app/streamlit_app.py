@@ -5,38 +5,34 @@
 #          AI-powered legal analysis
 #
 # HOW TO RUN:
-#   streamlit run app/streamlit_app.py
+#   PYTHONPATH=$(pwd) streamlit run app/streamlit_app.py
 #
-# WHAT IT DOES:
+# FEATURES:
 #   - Upload PDF contracts
 #   - Ask questions in plain English
 #   - Get AI answers with clause citations
-#   - See risk score (1-10) with visual indicator
+#   - Faithfulness score (anti-hallucination check)
+#   - Risk score (1-10) with visual indicator
 #   - Compare multiple contracts
 # =============================================================
+
 import sys
 import os
-
-# Add project root to Python path
-# Fixes 'No module named src' error on Streamlit Cloud
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import streamlit as st
-import os
 import tempfile
 
-# Our pipeline functions
 from src.pipeline.indexer import process_and_index_contract, get_indexed_contracts
 from src.pipeline.analyzer import answer_legal_question, flag_risky_clauses
 from src.pipeline.comparator import score_contract_risk, compare_contracts
-
-# Load environment variables
+from src.utils.faithfulness import score_faithfulness
 from dotenv import load_dotenv
 load_dotenv()
 
 
 # =============================================================
 # PAGE CONFIGURATION
-# Must be the first Streamlit command
 # =============================================================
 st.set_page_config(
     page_title="LexiQuery — Legal Contract Analyzer",
@@ -48,19 +44,15 @@ st.set_page_config(
 
 # =============================================================
 # CUSTOM CSS
-# Makes the app look professional and clean
 # =============================================================
 st.markdown("""
 <style>
-    /* Background image */
     .stApp {
         background-image: url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }
-    
-    /* Dark overlay */
     .stApp::before {
         content: '';
         position: fixed;
@@ -69,133 +61,66 @@ st.markdown("""
         background: rgba(10, 15, 30, 0.88);
         z-index: 0;
     }
-
-    /* ALL text white by default */
-    * {
+    * { color: white !important; }
+    h1, h2, h3 { color: #c9a84c !important; }
+    .stTextInput input,
+    .stTextArea textarea,
+    .stSelectbox select,
+    div[data-baseweb="select"],
+    div[data-baseweb="input"],
+    div[data-baseweb="textarea"] {
+        background: rgba(50,50,60,0.9) !important;
+        color: white !important;
+        border: 1px solid #c9a84c !important;
+    }
+    .stTextInput input::placeholder,
+    .stTextArea textarea::placeholder {
+        color: rgba(255,255,255,0.5) !important;
+    }
+    div[data-baseweb="select"] > div {
+        background: rgba(50,50,60,0.9) !important;
         color: white !important;
     }
-
-    /* Headers gold */
-    h1, h2, h3 {
-        color: #c9a84c !important;
+    ul[data-testid="stSelectboxVirtualDropdown"] {
+        background: rgba(30,30,40,0.98) !important;
     }
-
-    /* Input boxes - dark grey background white text */
-.stTextInput input, 
-.stTextArea textarea,
-.stSelectbox select,
-div[data-baseweb="select"],
-div[data-baseweb="input"],
-[data-testid="stFileUploadDropzone"],
-div[data-baseweb="textarea"] {
-    background: rgba(50,50,60,0.9) !important;
-    color: white !important;
-    border: 1px solid #c9a84c !important;
-}
-
-/* Placeholder text */
-.stTextInput input::placeholder,
-.stTextArea textarea::placeholder {
-    color: rgba(255,255,255,0.5) !important;
-}
-
-/* File uploader box */
-.stFileUploader,
-.stFileUploader > div,
-.stFileUploader label,
-[data-testid="stFileUploadDropzone"],
-[data-testid="stFileUploadDropzone"] > div,
-section[data-testid="stFileUploadDropzone"] {
-    background: rgba(50,50,60,0.9) !important;
-    border: 1px dashed #c9a84c !important;
-    color: white !important;
-}
-
-/* Every element inside file uploader */
-[data-testid="stFileUploadDropzone"] * {
-    color: white !important;
-    background: transparent !important;
-}
-
-/* The outer white wrapper */
-.uploadedFile,
-div.css-1cpxqw2,
-div.css-u8hs99 {
-    background: rgba(50,50,60,0.9) !important;
-    color: white !important;
-}
-
-/* File uploader inner text */
-[data-testid="stFileUploadDropzone"] p,
-[data-testid="stFileUploadDropzone"] span {
-    color: white !important;
-}
-
-/* Selectbox dropdown */
-div[data-baseweb="select"] > div {
-    background: rgba(50,50,60,0.9) !important;
-    color: white !important;
-}
-
-/* Dropdown options list */
-ul[data-testid="stSelectboxVirtualDropdown"] {
-    background: rgba(30,30,40,0.98) !important;
-}
-
-ul[data-testid="stSelectboxVirtualDropdown"] li {
-    color: white !important;
-}
-
-ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
-    background: rgba(201,168,76,0.3) !important;
-}
-
-    /* Dropdown options */
-    div[data-baseweb="popover"] {
-        background: #1a1a2e !important;
+    ul[data-testid="stSelectboxVirtualDropdown"] li {
         color: white !important;
     }
-
-    /* Buttons */
+    ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
+        background: rgba(201,168,76,0.3) !important;
+    }
+    .stFileUploader,
+    .stFileUploader > div,
+    .stFileUploader label,
+    [data-testid="stFileUploadDropzone"],
+    [data-testid="stFileUploadDropzone"] > div,
+    section[data-testid="stFileUploadDropzone"] {
+        background: rgba(50,50,60,0.9) !important;
+        border: 1px dashed #c9a84c !important;
+        color: white !important;
+    }
+    [data-testid="stFileUploadDropzone"] * {
+        color: white !important;
+        background: transparent !important;
+    }
     .stButton button {
         background: rgba(201,168,76,0.2) !important;
         color: white !important;
         border: 1px solid #c9a84c !important;
     }
-
     .stButton button:hover {
         background: rgba(201,168,76,0.4) !important;
     }
-
-    /* File uploader */
-    .stFileUploader {
-        background: rgba(255,255,255,0.1) !important;
-        border: 1px dashed #c9a84c !important;
-        color: white !important;
-    }
-
-    /* Success/info/warning boxes */
     .stSuccess, .stInfo, .stWarning, .stError {
         background: rgba(255,255,255,0.1) !important;
         color: white !important;
     }
-
-    /* Sidebar */
-    .css-1d391kg, [data-testid="stSidebar"] {
+    [data-testid="stSidebar"] {
         background: rgba(10,15,30,0.95) !important;
     }
-
-    /* Radio buttons */
-    .stRadio label {
-        color: white !important;
-    }
-
-    /* Caption text */
-    .stCaption {
-        color: #c9a84c !important;
-    }
-
-    /* Main header */
+    .stRadio label { color: white !important; }
+    .stCaption { color: #c9a84c !important; }
     .main-header {
         font-size: 2.5rem;
         font-weight: 700;
@@ -204,21 +129,15 @@ ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
         padding: 1rem 0;
         text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
     }
-
-    /* Subtitle */
     .sub-header {
         font-size: 1.1rem;
         color: white !important;
         text-align: center;
         margin-bottom: 2rem;
     }
-
-    /* Risk score colors */
     .risk-low { color: #28a745 !important; font-size: 2rem; font-weight: 700; }
     .risk-medium { color: #ffc107 !important; font-size: 2rem; font-weight: 700; }
     .risk-high { color: #dc3545 !important; font-size: 2rem; font-weight: 700; }
-
-    /* Clause card */
     .clause-card {
         background: rgba(255,255,255,0.08);
         border-left: 4px solid #c9a84c;
@@ -227,18 +146,14 @@ ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
         border-radius: 4px;
         color: white !important;
     }
-
-    /* Answer box */
     .answer-box {
         background: rgba(201,168,76,0.15);
         border: 1px solid #c9a84c;
         border-radius: 8px;
         padding: 1.5rem;
         margin: 1rem 0;
-        color: black !important;
+        color: white !important;
     }
-
-    /* Footer */
     .footer {
         text-align: center;
         color: #c9a84c !important;
@@ -247,22 +162,12 @@ ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
         padding-top: 1rem;
         border-top: 1px solid #c9a84c44;
     }
-
-    /* Expander */
     .streamlit-expanderHeader {
         color: white !important;
         background: rgba(255,255,255,0.1) !important;
     }
-
-    /* Metric */
-    [data-testid="stMetricValue"] {
-        color: #c9a84c !important;
-    }
-
-    /* Progress bar */
-    .stProgress > div > div {
-        background: #c9a84c !important;
-    }
+    [data-testid="stMetricValue"] { color: #c9a84c !important; }
+    .stProgress > div > div { background: #c9a84c !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -272,7 +177,6 @@ ul[data-testid="stSelectboxVirtualDropdown"] li:hover {
 # =============================================================
 
 def get_risk_color(score: int) -> str:
-    """Return color class based on risk score."""
     if score <= 3:
         return "risk-low"
     elif score <= 6:
@@ -282,7 +186,6 @@ def get_risk_color(score: int) -> str:
 
 
 def get_risk_emoji(score: int) -> str:
-    """Return emoji based on risk score."""
     if score <= 3:
         return "🟢"
     elif score <= 6:
@@ -291,43 +194,64 @@ def get_risk_emoji(score: int) -> str:
         return "🔴"
 
 
+def display_faithfulness(faithfulness: dict):
+    """Display faithfulness score with color coding."""
+    score = faithfulness["score"]
+    if score >= 0.8:
+        color = "#28a745"
+        emoji = "🟢"
+    elif score >= 0.6:
+        color = "#ffc107"
+        emoji = "🟡"
+    else:
+        color = "#dc3545"
+        emoji = "🔴"
+
+    st.markdown(f"""
+    <div style='background:rgba(255,255,255,0.08);
+    border-left: 4px solid {color};
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-top: 8px;'>
+        <strong style='color:{color};'>{emoji} Faithfulness Score: {score}/1.0</strong>
+        <br>
+        <span style='color:white;font-size:13px;'>{faithfulness["interpretation"]}</span>
+        <br>
+        <span style='color:#aaa;font-size:12px;'>{faithfulness["reasoning"]}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 def display_risk_score(result: dict):
-    """Display risk score in a visual way."""
+    """Display risk score visually."""
     score = result["risk_score"]
     level = result["risk_level"]
     emoji = get_risk_emoji(score)
 
     col1, col2, col3 = st.columns([1, 2, 1])
-
     with col2:
         st.markdown(f"""
         <div style='text-align: center; padding: 1.5rem;
-        background: #f8f9fa; border-radius: 12px;
+        background: rgba(255,255,255,0.08); border-radius: 12px;
         border: 2px solid #dee2e6;'>
-            <div style='font-size: 1rem; color: #666;
-            margin-bottom: 0.5rem;'>Overall Risk Score</div>
+            <div style='font-size: 1rem; color: #aaa; margin-bottom: 0.5rem;'>Overall Risk Score</div>
             <div style='font-size: 3.5rem;'>{emoji}</div>
             <div class='{get_risk_color(score)}'>{score}/10</div>
-            <div style='font-size: 1.1rem; color: #444;
-            margin-top: 0.5rem;'>{level} Risk</div>
+            <div style='font-size: 1.1rem; color: #ccc; margin-top: 0.5rem;'>{level} Risk</div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Progress bar for visual representation
     st.progress(score / 10)
 
-    # Summary
     if result.get("summary"):
         st.info(f"📋 {result['summary']}")
 
-    # Red flags
     if result.get("red_flags"):
         st.subheader("🚩 Red Flags")
         for flag in result["red_flags"]:
             if flag.strip():
                 st.warning(f"⚠️ {flag}")
 
-    # Recommendations
     if result.get("recommendations"):
         st.subheader("💡 Recommendations")
         for rec in result["recommendations"]:
@@ -344,7 +268,6 @@ with st.sidebar:
     st.caption("AI-Powered Legal Contract Analyzer")
     st.divider()
 
-    # Navigation
     page = st.radio(
         "Navigate",
         ["🏠 Home", "📄 Analyze Contract", "⚖️ Risk Score", "🔍 Compare Contracts"],
@@ -352,8 +275,6 @@ with st.sidebar:
     )
 
     st.divider()
-
-    # Show indexed contracts
     st.subheader("📁 Indexed Contracts")
     contracts = get_indexed_contracts()
     if contracts:
@@ -363,7 +284,7 @@ with st.sidebar:
         st.info("No contracts indexed yet")
 
     st.divider()
-    st.caption("Built with LangChain, ChromaDB, Groq & Streamlit")
+    st.caption("Built with RAG, ChromaDB, Groq & Streamlit")
 
 
 # =============================================================
@@ -381,7 +302,6 @@ if page == "🏠 Home":
 
     st.divider()
 
-    # Feature cards
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -411,8 +331,8 @@ if page == "🏠 Home":
         <span style='color:#c9a84c;font-size:1.2rem;font-weight:700;'>🔍 Compare</span>
         <p style='color:white;margin-top:0.5rem;'>Compare multiple contracts side by side to find the best deal</p>
         </div>""", unsafe_allow_html=True)
-    st.divider()
 
+    st.divider()
     st.markdown("### 🚀 How to Get Started")
     st.markdown("""
     1. Click **Analyze Contract** in the sidebar
@@ -434,7 +354,6 @@ elif page == "📄 Analyze Contract":
     st.title("📄 Analyze Contract")
     st.caption("Upload a contract and ask questions in plain English")
 
-    # File uploader
     uploaded_file = st.file_uploader(
         "Upload your contract (PDF)",
         type=["pdf"],
@@ -442,25 +361,18 @@ elif page == "📄 Analyze Contract":
     )
 
     if uploaded_file:
-        # Get contract name from file name
         contract_name = uploaded_file.name.replace(".pdf", "").replace(" ", "_")
-
         st.success(f"✅ File uploaded: {uploaded_file.name}")
 
-        # Index button
         if st.button("🔍 Index this Contract", type="primary"):
             with st.spinner("Reading and indexing contract..."):
-                # Save uploaded file temporarily
                 with tempfile.NamedTemporaryFile(
                     delete=False, suffix=".pdf"
                 ) as tmp_file:
                     tmp_file.write(uploaded_file.getvalue())
                     tmp_path = tmp_file.name
 
-                # Process and index
                 result = process_and_index_contract(tmp_path, contract_name)
-
-                # Clean up temp file
                 os.unlink(tmp_path)
 
                 if result["success"]:
@@ -475,10 +387,8 @@ elif page == "📄 Analyze Contract":
 
     st.divider()
 
-    # Q&A Section
     st.subheader("💬 Ask a Question")
 
-    # Contract selector
     contracts = get_indexed_contracts()
     if contracts:
         selected_contract = st.selectbox(
@@ -486,7 +396,6 @@ elif page == "📄 Analyze Contract":
             ["All contracts"] + contracts
         )
 
-        # Example questions
         st.caption("Example questions:")
         example_cols = st.columns(2)
         with example_cols[0]:
@@ -500,7 +409,6 @@ elif page == "📄 Analyze Contract":
             if st.button("What is confidential?"):
                 st.session_state["question"] = "What information is considered confidential?"
 
-        # Question input
         question = st.text_area(
             "Your question",
             value=st.session_state.get("question", ""),
@@ -524,17 +432,26 @@ elif page == "📄 Analyze Contract":
                     unsafe_allow_html=True
                 )
 
-                # Show sources
+                # Faithfulness score
+                with st.spinner("Checking answer faithfulness..."):
+                    faithfulness = score_faithfulness(
+                        question=question,
+                        answer=result["answer"],
+                        retrieved_clauses=result["relevant_clauses"]
+                    )
+                display_faithfulness(faithfulness)
+
+                # Sources
                 st.subheader("📎 Sources Used")
                 for source in result["clauses_used"]:
                     st.caption(f"• {source}")
 
-                # Show relevant clauses
+                # Relevant clauses
                 with st.expander("🔍 View Relevant Clauses"):
                     for clause in result["relevant_clauses"]:
                         st.markdown(f"""
                         <div class="clause-card">
-                            <strong>Clause {clause['clause_number']} 
+                            <strong>Clause {clause['clause_number']}
                             from {clause['contract']}</strong>
                             <br>Relevance: {clause['relevance_score']}
                             <br><br>{clause['text']}
