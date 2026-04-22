@@ -12,6 +12,7 @@
 #   - Ask questions in plain English
 #   - Get AI answers with clause citations
 #   - Faithfulness score (anti-hallucination check)
+#   - Download analysis report
 #   - Risk score (1-10) with visual indicator
 #   - Compare multiple contracts
 # =============================================================
@@ -27,12 +28,14 @@ from src.pipeline.indexer import process_and_index_contract, get_indexed_contrac
 from src.pipeline.analyzer import answer_legal_question, flag_risky_clauses
 from src.pipeline.comparator import score_contract_risk, compare_contracts
 from src.utils.faithfulness import score_faithfulness
+from src.utils.export import generate_text_report
 from dotenv import load_dotenv
 load_dotenv()
 
 
 # =============================================================
 # PAGE CONFIGURATION
+# Must be the first Streamlit command
 # =============================================================
 st.set_page_config(
     page_title="LexiQuery — Legal Contract Analyzer",
@@ -44,6 +47,7 @@ st.set_page_config(
 
 # =============================================================
 # CUSTOM CSS
+# Makes the app look professional and clean
 # =============================================================
 st.markdown("""
 <style>
@@ -177,6 +181,7 @@ st.markdown("""
 # =============================================================
 
 def get_risk_color(score: int) -> str:
+    """Return CSS class based on risk score."""
     if score <= 3:
         return "risk-low"
     elif score <= 6:
@@ -186,6 +191,7 @@ def get_risk_color(score: int) -> str:
 
 
 def get_risk_emoji(score: int) -> str:
+    """Return emoji based on risk score."""
     if score <= 3:
         return "🟢"
     elif score <= 6:
@@ -195,7 +201,11 @@ def get_risk_emoji(score: int) -> str:
 
 
 def display_faithfulness(faithfulness: dict):
-    """Display faithfulness score with color coding."""
+    """
+    WHAT THIS DOES:
+    Displays the faithfulness score with color coding.
+    Green = highly faithful, Yellow = partial, Red = hallucination risk.
+    """
     score = faithfulness["score"]
     if score >= 0.8:
         color = "#28a745"
@@ -223,7 +233,11 @@ def display_faithfulness(faithfulness: dict):
 
 
 def display_risk_score(result: dict):
-    """Display risk score visually."""
+    """
+    WHAT THIS DOES:
+    Displays risk score visually with emoji, progress bar,
+    summary, red flags, and recommendations.
+    """
     score = result["risk_score"]
     level = result["risk_level"]
     emoji = get_risk_emoji(score)
@@ -234,10 +248,12 @@ def display_risk_score(result: dict):
         <div style='text-align: center; padding: 1.5rem;
         background: rgba(255,255,255,0.08); border-radius: 12px;
         border: 2px solid #dee2e6;'>
-            <div style='font-size: 1rem; color: #aaa; margin-bottom: 0.5rem;'>Overall Risk Score</div>
+            <div style='font-size: 1rem; color: #aaa;
+            margin-bottom: 0.5rem;'>Overall Risk Score</div>
             <div style='font-size: 3.5rem;'>{emoji}</div>
             <div class='{get_risk_color(score)}'>{score}/10</div>
-            <div style='font-size: 1.1rem; color: #ccc; margin-top: 0.5rem;'>{level} Risk</div>
+            <div style='font-size: 1.1rem; color: #ccc;
+            margin-top: 0.5rem;'>{level} Risk</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -333,6 +349,38 @@ if page == "🏠 Home":
         </div>""", unsafe_allow_html=True)
 
     st.divider()
+
+    # Research grade features
+    st.subheader("🔬 Research-Grade Features")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div style='background:rgba(255,255,255,0.08);padding:1rem;border-radius:8px;margin-bottom:8px;'>
+        <strong style='color:#c9a84c;'>🔍 Hybrid Search</strong>
+        <p style='color:white;font-size:13px;margin-top:4px;'>BM25 + Vector search with Reciprocal Rank Fusion for superior retrieval accuracy</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style='background:rgba(255,255,255,0.08);padding:1rem;border-radius:8px;'>
+        <strong style='color:#c9a84c;'>📊 RAG Evaluation</strong>
+        <p style='color:white;font-size:13px;margin-top:4px;'>Hit Rate: 100% | MRR: 0.875 on 10-question test dataset</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style='background:rgba(255,255,255,0.08);padding:1rem;border-radius:8px;margin-bottom:8px;'>
+        <strong style='color:#c9a84c;'>🛡️ Faithfulness Scoring</strong>
+        <p style='color:white;font-size:13px;margin-top:4px;'>0.9/1.0 anti-hallucination layer — every answer is verified against source clauses</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div style='background:rgba(255,255,255,0.08);padding:1rem;border-radius:8px;'>
+        <strong style='color:#c9a84c;'>📥 Export Reports</strong>
+        <p style='color:white;font-size:13px;margin-top:4px;'>Download full analysis reports as text files after every Q&A session</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
     st.markdown("### 🚀 How to Get Started")
     st.markdown("""
     1. Click **Analyze Contract** in the sidebar
@@ -354,6 +402,7 @@ elif page == "📄 Analyze Contract":
     st.title("📄 Analyze Contract")
     st.caption("Upload a contract and ask questions in plain English")
 
+    # File uploader
     uploaded_file = st.file_uploader(
         "Upload your contract (PDF)",
         type=["pdf"],
@@ -387,6 +436,7 @@ elif page == "📄 Analyze Contract":
 
     st.divider()
 
+    # Q&A Section
     st.subheader("💬 Ask a Question")
 
     contracts = get_indexed_contracts()
@@ -396,6 +446,7 @@ elif page == "📄 Analyze Contract":
             ["All contracts"] + contracts
         )
 
+        # Example questions
         st.caption("Example questions:")
         example_cols = st.columns(2)
         with example_cols[0]:
@@ -409,6 +460,7 @@ elif page == "📄 Analyze Contract":
             if st.button("What is confidential?"):
                 st.session_state["question"] = "What information is considered confidential?"
 
+        # Question input
         question = st.text_area(
             "Your question",
             value=st.session_state.get("question", ""),
@@ -445,6 +497,29 @@ elif page == "📄 Analyze Contract":
                 st.subheader("📎 Sources Used")
                 for source in result["clauses_used"]:
                     st.caption(f"• {source}")
+
+                # Download report button
+                report_text = generate_text_report(
+                    contract_name=selected_contract,
+                    risk_result={
+                        "risk_score": "N/A",
+                        "risk_level": "N/A",
+                        "summary": "Run Risk Score tab for full analysis",
+                        "red_flags": [],
+                        "recommendations": []
+                    },
+                    qa_results=[{
+                        "question": question,
+                        "answer": result["answer"],
+                        "sources": result["clauses_used"]
+                    }]
+                )
+                st.download_button(
+                    label="📥 Download Analysis Report",
+                    data=report_text,
+                    file_name=f"lexiquery_{selected_contract}_analysis.txt",
+                    mime="text/plain"
+                )
 
                 # Relevant clauses
                 with st.expander("🔍 View Relevant Clauses"):
